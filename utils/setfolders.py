@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+import shutil
 
 df = pd.read_csv("FaceARG\\train\\train.csv")
 
@@ -30,6 +31,7 @@ for folder in folders:
 
     for file_name in os.listdir(folder):
         if any(prefix in file_name for prefix in male_prefixes if not type(prefix) == type(9.8)):
-            os.rename(f"{folder}/{file_name}", f"{male_dir}/{file_name}")
+            shutil.copy2(f"new_data_set/{folder}/{file_name}", f"{male_dir}/{file_name}")
         elif any(prefix in file_name for prefix in female_prefixes if not type(prefix) == type(9.8) ):
-            os.rename(f"{folder}/{file_name}", f"{female_dir}/{file_name}")
+            shutil.copy2(f"new_data_set/{folder}/{file_name}", f"{female_dir}/{file_name}")
+

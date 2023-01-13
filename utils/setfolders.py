@@ -22,8 +22,8 @@ folders = ["FaceARG\\train\\afro-american", "FaceARG\\train\\asian", "FaceARG\\t
 
 for folder in folders:
     # Define the paths for the male and female directories
-    male_dir = f"{folder}\\male"
-    female_dir = f"{folder}\\female"
+    male_dir = f"new_data_set\\{folder}\\male"
+    female_dir = f"new_data_set\\{folder}\\female"
 
     # Create the male and female directories
     os.makedirs(male_dir, exist_ok=True)
@@ -31,7 +31,7 @@ for folder in folders:
 
     for file_name in os.listdir(folder):
         if any(prefix in file_name for prefix in male_prefixes if not type(prefix) == type(9.8)):
-            shutil.copy2(f"new_data_set/{folder}/{file_name}", f"{male_dir}/{file_name}")
+            shutil.copy2(f"{folder}/{file_name}", f"{male_dir}/{file_name}")
         elif any(prefix in file_name for prefix in female_prefixes if not type(prefix) == type(9.8) ):
-            shutil.copy2(f"new_data_set/{folder}/{file_name}", f"{female_dir}/{file_name}")
+            shutil.copy2(f"{folder}/{file_name}", f"{female_dir}/{file_name}")
 

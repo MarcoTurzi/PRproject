@@ -2,7 +2,7 @@ import pandas as pd
 import os
 import shutil
 
-df = pd.read_csv("FaceARG\\train\\train.csv")
+df = pd.read_csv("FaceARG\\test\\test.csv")
 
 male = df[df["female"] == 0]
 female = df[df["female"] == 1]
@@ -16,9 +16,7 @@ print(male_prefixes)
 print(female_prefixes)
 
 # Define the paths for the 4 folders containing face images
-folders = ["FaceARG\\train\\afro-american", "FaceARG\\train\\asian", "FaceARG\\train\\caucasian", "FaceARG\\train\\indian"]
-
-
+folders = ["FaceARG\\test\\afro-american", "FaceARG\\test\\asian", "FaceARG\\test\\caucasian", "FaceARG\\test\\indian"]
 
 for folder in folders:
     # Define the paths for the male and female directories
@@ -30,8 +28,8 @@ for folder in folders:
     os.makedirs(female_dir, exist_ok=True)
 
     for file_name in os.listdir(folder):
-        if any(prefix in file_name for prefix in male_prefixes if not type(prefix) == type(9.8)):
-            shutil.copy2(f"{folder}/{file_name}", f"{male_dir}/{file_name}")
-        elif any(prefix in file_name for prefix in female_prefixes if not type(prefix) == type(9.8) ):
-            shutil.copy2(f"{folder}/{file_name}", f"{female_dir}/{file_name}")
-
+        file_name = file_name.replace(".jpg","")
+        if file_name in male_prefixes:
+            shutil.copy2(f"{folder}/{file_name}.jpg", f"{male_dir}/{file_name}.jpg")
+        elif file_name in female_prefixes:
+            shutil.copy2(f"{folder}/{file_name}.jpg", f"{female_dir}/{file_name}.jpg")

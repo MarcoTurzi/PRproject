@@ -51,16 +51,7 @@ test_ds_indian = tf.keras.preprocessing.image_dataset_from_directory(
     batch_size=1,
     seed=123)
 
-labels = np.array([])
-images = np.array([])
-pred = np.array([])
-k = 0
-for i,l in test_ds_cauc.take(-1):
-    labels = np.append(labels,l)
-    if k == 0:
-        imag = np.expand_dims(i.numpy(),axis=0)
-        print(imag.shape)
-    k = k + 1
+
 
 model = tf.keras.Sequential()
 

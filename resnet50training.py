@@ -130,57 +130,7 @@ print(model.evaluate(x = test_ds_indian,
             verbose=0,
             return_dict=True))
 
-'''labels = np.array([])
-images = np.array([])
-pred = []
-for i,l in test_ds_cauc.take(-1):
-    labels = np.append(labels,l)
-    imag = np.expand_dims(i.numpy(),axis=0)
-    pred.append(1 if model.predict(imag.reshape((1,299,299,3)), verbose=0)[0][0] > 0.5 else 0)
 
-
-print("CAUCASIAN")
-print(classification_report(labels, pred))
-print(confusion_matrix(labels, pred))
-
-labels = np.array([])
-images = np.array([])
-pred = []
-for i,l in test_ds_afro.take(-1):
-    labels = np.append(labels,l)
-    imag = np.expand_dims(i.numpy(),axis=0)
-    pred.append(1 if model.predict(imag.reshape((1,299,299,3)), verbose=0)[0][0] > 0.5 else 0)
-
-print("AFRO-AMERICAN")
-print(classification_report(labels, pred))
-print(confusion_matrix(labels, pred))
-
-labels = np.array([])
-images = np.array([])
-pred = []
-for i,l in test_ds_indian.take(-1):
-    labels = np.append(labels,l)
-    imag = np.expand_dims(i.numpy(),axis=0)
-    pred.append(1 if model.predict(imag.reshape((1,299,299,3)), verbose=0)[0][0] > 0.5 else 0)
-
-
-print("INDIAN")
-print(classification_report(labels, pred))
-print(confusion_matrix(labels, pred))
-
-labels = np.array([])
-images = np.array([])
-pred = []
-for i,l in test_ds_asian.take(-1):
-    labels = np.append(labels,l)
-    imag = np.expand_dims(i.numpy(),axis=0)
-    pred.append(1 if model.predict(imag.reshape((1,299,299,3)), verbose=0)[0][0] > 0.5 else 0)
-
-
-print("ASIAN")
-print(classification_report(labels, pred))
-print(confusion_matrix(labels, pred))
-'''
 history_df = pd.DataFrame(history.history)
 history_df.loc[0:, ['accuracy', 'val_accuracy']].plot()
 

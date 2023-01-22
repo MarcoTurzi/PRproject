@@ -3,12 +3,15 @@ import numpy as np
 import pandas as pd
 from tensorflow.keras.preprocessing.image import load_img
 import os
+import pickle
 
 class DataHandler:
     def __init__(self, rootDirectory):
         self.rootD = rootDirectory
         self.trainDF = pd.read_csv(rootDirectory + '/train/train.csv')
         self.testDF = pd.read_csv(rootDirectory + '/test/test.csv')
+        if not os.path.exists(rootDirectory + '/pickled_objects'):
+            os.mkdir(rootDirectory + '/pickled_objects')
     def get_transformed_feature_df(self, cnn, cnnPreproc, targetSize = (224,224),type="both", maxDataPerRace : int = 0):
         """
 
@@ -58,12 +61,28 @@ class DataHandler:
         X = np.array(X)
         print("Preprocessing for CNN model has finished for " + type + " data...")
         print("CNN transformation has started for " + type + " data...")
+
+
+
+
+
         O = cnn.predict(X)
         del X
+
+
+
+
         dfRes = pd.DataFrame(O)
-        del O
+
         dfRes.index = indices
         dfRes = dfRes.join(df)
+
+        del O
+        dir = self.rootD + "/pickled_objects/" + "ABM_"+type+"_data.pkl"
+        if os.path.exists(dir):
+            os.remove(dir)
+        dfRes.to_pickle(dir)
+
         print("CNN transformation has finished for " + type + " data...")
         return dfRes
 

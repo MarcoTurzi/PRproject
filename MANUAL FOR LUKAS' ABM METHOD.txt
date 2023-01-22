@@ -1,0 +1,13 @@
+In this manual I suppose you want to use the VGG_Face model and replace the final layer with an Adversarial Bias Mitigation (ABM) module. In principle the main part of me code should also work with other CNN models but this would require writing some code of your own.  
+
+1) Get the vgg_face_weights.h5 from this folder link (https://drive.google.com/file/d/16waX5Q47yA8XNf2kwz6ff-YvUzZuWttE/view?usp=share_link) and put it in the vgg_face folder. (Unfortunately this file is too big to upload on github itself.) 
+
+2) Make sure you have the FaceARG data set without manipulations (or change the prepoc script so that it can read the data when the folders are structured differently). 
+
+3) run the following lines in a python console launched from the main folder with all the scripts:
+"
+import ABM_On_Beheaded_CNN as ABM
+ABM.RunCompleteRoutineOnVGG([dataRootDirectory],[maxDataPerRace])
+",
+where [dataRootDirectory] (string) should be the directory of the extracted FaceArg data set folder (so it should be the directory of the folder which has the two folders train and test as only content) and [maxDataPerRace] (int) is the number of data samples that should be used per race category in training and testing. If you set it below 0, it should include all data. 
+

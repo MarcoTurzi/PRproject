@@ -17,13 +17,14 @@ class DataHandler:
         :param type: can be either "train" or "test" to return train or test data only, or "both" to return both as a tuple.
         :return:
         """
-        print(str(maxDataPerRace))
+
 
         if not type in ["train","test","both"]:
             return None
         if type == "both":
             return self.get_transformed_feature_df(cnn,cnnPreproc, targetSize,"train",maxDataPerRace), \
                    self.get_transformed_feature_df(cnn,cnnPreproc, targetSize,"test",maxDataPerRace)
+        print("Preprocessing for CNN model has started for " + type + " data...")
         df = self.trainDF.copy()
         if type == "test":
             df = self.testDF.copy()
@@ -50,16 +51,20 @@ class DataHandler:
                 indices.append(imgName)
 
                 i += 1
-                print(str(i))
+               # print(str(i))
             if nonExistent > 0:
                 print("Warning: " + str(nonExistent) + " filenames were not found.")
 
         X = np.array(X)
+        print("Preprocessing for CNN model has finished for " + type + " data...")
+        print("CNN transformation has started for " + type + " data...")
         O = cnn.predict(X)
+        del X
         dfRes = pd.DataFrame(O)
+        del O
         dfRes.index = indices
         dfRes = dfRes.join(df)
-
+        print("CNN transformation has finished for " + type + " data...")
         return dfRes
 
 

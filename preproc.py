@@ -4,6 +4,7 @@ import pandas as pd
 from tensorflow.keras.preprocessing.image import load_img
 import os
 import pickle
+import gc
 
 class DataHandler:
     def __init__(self, rootDirectory):
@@ -37,10 +38,10 @@ class DataHandler:
         indices = []
 
         for race in pd.unique(df['race']):
+            print('Preprocessing data for race label "'+ race +'"')
             nonExistent = 0
             i = 0
             for imgName in df[df['race']==race].index:
-
                 path = self.rootD+'/'+type+'/'+df.loc[imgName,'race'] +'/'+imgName+'.jpg'
                 if  not isinstance(path,str) or not os.path.exists(path):
                     nonExistent += 1
@@ -50,11 +51,13 @@ class DataHandler:
                     break
                 img = load_img(path, target_size = targetSize)
                 x = cnnPreproc(img)
+                del img
                 X.append(x)
                 indices.append(imgName)
 
                 i += 1
                # print(str(i))
+                gc.collect()
             if nonExistent > 0:
                 print("Warning: " + str(nonExistent) + " filenames were not found.")
 

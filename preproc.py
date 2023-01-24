@@ -56,8 +56,8 @@ class DataHandler:
                 indices.append(imgName)
 
                 i += 1
-               # print(str(i))
-                gc.collect()
+                #print(str(i))
+                #gc.collect()
             if nonExistent > 0:
                 print("Warning: " + str(nonExistent) + " filenames were not found.")
 

@@ -15,14 +15,19 @@ import matplotlib.pyplot as plt
 from aif360.metrics import BinaryLabelDatasetMetric
 from aif360.metrics import ClassificationMetric
 from aif360.metrics.utils import compute_boolean_conditioning_vector
+import  pickle
 
 tf.disable_eager_execution()
 
-def RunCompleteRoutineOnVGG(dataRootDirectory, maxDataPerRace=100,incorporate_train_data_in_evaluation=True):
+def RunCompleteRoutineOnVGG(dataRootDirectory, maxDataPerRace=100,incorporate_train_data_in_evaluation=True, pickleABM_Runner = True):
     abm = ABM_Runner()
     abm.Run_ABM_on_VGG(dataRootDirectory,maxDataPerRace)
     abm.Evaluate_All()
-    return  abm
+    # WIP
+  #  if pickleABM_Runner:
+   #     file = open(dataRootDirectory+'/pickled_objects/ABM_Runner_'+str(maxDataPerRace)+'_per_race.pkl','wb')
+    #    pickle.dump(abm,file)
+    return abm
 
 class ABM_Runner:
     def __init__(self):
@@ -50,7 +55,7 @@ class ABM_Runner:
         SDte = BinaryLabelDataset(favorable_label=1.0,unfavorable_label=0.0,df=DFte,label_names=['female'],protected_attribute_names=['priv'])
 
         self.train_data = SDtr
-        self.test_data = SDtr
+        self.test_data = SDte
 
 
         sess = tf.Session()
@@ -125,11 +130,11 @@ class ABM_Runner:
             incorporate_train_data = True
 
 
-        caption = "#### Plain model - with debiasing - dataset metrics"
+        caption = "#### Plain model - with debiasing - dataset metrics:"
         if not debiased:
             caption = caption.replace("with", "without")
         if incorporate_train_data:
-            display(Markdown(caption))
+            print(caption)
             metric_dataset_nodebiasing_train = BinaryLabelDatasetMetric(Y_train,
                                                                         unprivileged_groups=unprivileged_groups,
                                                                         privileged_groups=privileged_groups)
@@ -144,10 +149,10 @@ class ABM_Runner:
         print(
             "Test set: Difference in mean outcomes between unprivileged and privileged groups = %f" % metric_dataset_nodebiasing_test.mean_difference())
 
-        caption = "#### Plain model - with debiasing - classification metrics"
+        caption = "#### Plain model - with debiasing - classification metrics:"
         if not debiased:
             caption = caption.replace("with", "without")
-        display(Markdown(caption))
+        print(caption)
         classified_metric_nodebiasing_test = ClassificationMetric(self.test_data,
                                                                   Y_test,
                                                                   unprivileged_groups=unprivileged_groups,

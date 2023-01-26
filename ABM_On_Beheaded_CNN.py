@@ -2,7 +2,7 @@
 #adversarial bias mitigation (ABM) on what we call a "beheaded CNN", which is a trained and fixed...
 #CNN model which has been stripped of its top layer so that its final layer and output is a flattened
 # array of node outputs.
-
+import os.path
 
 from aif360.algorithms.inprocessing.adversarial_debiasing import AdversarialDebiasing
 from aif360.datasets import StructuredDataset, BinaryLabelDataset
@@ -19,7 +19,7 @@ import  pickle
 
 tf.disable_eager_execution()
 
-def RunCompleteRoutineOnVGG(dataRootDirectory, maxDataPerRace=100,incorporate_train_data_in_evaluation=True, pickleABM_Runner = True):
+def RunCompleteRoutineOnVGG(dataRootDirectory, maxDataPerRace=100,incorporate_train_data_in_evaluation=True,  save = True, saveFolderName = "model"):
     """
 
     @param dataRootDirectory:
@@ -31,10 +31,12 @@ def RunCompleteRoutineOnVGG(dataRootDirectory, maxDataPerRace=100,incorporate_tr
     abm = ABM_Runner()
     abm.Run_ABM_on_VGG(dataRootDirectory,maxDataPerRace)
     abm.Evaluate_All()
+    if save:
+        abm.Save(dataRootDirectory+"/pickled_objects/"+saveFolderName)
     # WIP
-  #  if pickleABM_Runner:
-   #     file = open(dataRootDirectory+'/pickled_objects/ABM_Runner_'+str(maxDataPerRace)+'_per_race.pkl','wb')
-    #    pickle.dump(abm,file)
+    #if pickleABM_Runner:
+     #   file = open(dataRootDirectory+'/pickled_objects/ABM_Runner_'+str(maxDataPerRace)+'_per_race.pkl','wb')
+      #  pickle.dump(abm,file)
     return abm
 
 class ABM_Runner:
@@ -46,6 +48,10 @@ class ABM_Runner:
         self.Pred_train_plain = None
         self.Pred_test_debiased = None
         self.Pred_train_debiased = None
+        self.train_data = None
+        self.test_data = None
+        self.raceTrain = []
+        self.raceTest = []
     def Run_ABM_on_VGG(self, dataRootDirectory, maxDataPerRace=100):
         """
         This method takes a beheaded trained CNN and learns its final layer using ABM learning.
@@ -55,8 +61,10 @@ class ABM_Runner:
         DFtr, DFte  = dh.get_transformed_feature_df(vgg,VGG.preprocess_img,type="both",maxDataPerRace= maxDataPerRace)
 
         DFtr['priv'] = DFtr['race'].map(lambda x: x == 'caucasian')
+        self.raceTrain = DFtr['race']
         DFtr= DFtr.drop(['race'],axis=1)
         DFte['priv'] = DFte['race'].map(lambda x: x == 'caucasian')
+        self.raceTest = DFte['race']
         DFte = DFte.drop(['race'], axis=1)
 
         SDtr = BinaryLabelDataset(favorable_label=1.0,unfavorable_label=0.0,df=DFtr,label_names=['female'],protected_attribute_names=['priv'])
@@ -182,6 +190,63 @@ class ABM_Runner:
             return
         self.Evaluate(False)
         self.Evaluate(True)
+
+    def Save(self, directory):
+        if not os.path.exists(directory):
+            os.mkdir(directory)
+        df, dict = self.Pred_train_plain.convert_to_dataframe()
+        df.to_pickle(directory+'/train_plain.pkl')
+        file = open(directory + '/label_dict.pkl','wb')
+        pickle.dump(dict, file)
+        file.close()
+        df,_ = self.Pred_test_plain.convert_to_dataframe()
+        df.to_pickle(directory+'/test_plain.pkl')
+        df, _ = self.Pred_train_debiased.convert_to_dataframe()
+        df.to_pickle(directory + '/train_debiased.pkl')
+        df, _ = self.Pred_test_debiased.convert_to_dataframe()
+        df.to_pickle(directory + '/test_debiased.pkl')
+        df, _ = self.test_data.convert_to_dataframe()
+        df.to_pickle(directory + '/test_data.pkl')
+        df, _ = self.train_data.convert_to_dataframe()
+        df.to_pickle(directory + '/train_data.pkl')
+        self.raceTest.to_pickle(directory + '/test_race.pkl')
+        self.raceTrain.to_pickle(directory + '/train_race.pkl')
+
+    def Create_from_folder(directory):
+        abm = ABM_Runner()
+        file = open(directory + "/label_dict.pkl", "rb")
+        labelDict = pickle.load(file)
+        file.close()
+        df = pd.read_pickle(directory + '/train_plain.pkl')
+
+        abm.Pred_train_plain = BinaryLabelDataset(favorable_label=1.0,unfavorable_label=0.0,
+                                                  df=pd.read_pickle(directory + '/train_plain.pkl'),label_names=labelDict['label_names'],
+                                                  protected_attribute_names=labelDict['protected_attribute_names'])
+        abm.Pred_test_plain = BinaryLabelDataset(favorable_label=1.0, unfavorable_label=0.0,
+                                                  df=pd.read_pickle(directory + '/test_plain.pkl'),
+                                                  label_names=labelDict['label_names'],
+                                                  protected_attribute_names=labelDict['protected_attribute_names'])
+        abm.Pred_train_debiased = BinaryLabelDataset(favorable_label=1.0, unfavorable_label=0.0,
+                                                  df=pd.read_pickle(directory + '/train_debiased.pkl'),
+                                                  label_names=labelDict['label_names'],
+                                                  protected_attribute_names=labelDict['protected_attribute_names'])
+        abm.Pred_test_debiased = BinaryLabelDataset(favorable_label=1.0, unfavorable_label=0.0,
+                                                  df=pd.read_pickle(directory + '/test_debiased.pkl'),
+                                                  label_names=labelDict['label_names'],
+                                                  protected_attribute_names=labelDict['protected_attribute_names'])
+        abm.test_data = BinaryLabelDataset(favorable_label=1.0, unfavorable_label=0.0,
+                                                    df=pd.read_pickle(directory + '/test_data.pkl'),
+                                                    label_names=labelDict['label_names'],
+                                                    protected_attribute_names=labelDict['protected_attribute_names'])
+        abm.train_data = BinaryLabelDataset(favorable_label=1.0, unfavorable_label=0.0,
+                                                    df=pd.read_pickle(directory + '/train_data.pkl'),
+                                                    label_names=labelDict['label_names'],
+                                                    protected_attribute_names=labelDict['protected_attribute_names'])
+        abm.raceTest = pd.read_pickle(directory + '/test_race.pkl')
+        abm.raceTrain = pd.read_pickle(directory + '/train_race.pkl')
+        abm.trained = True
+        return abm
+
 
 
 

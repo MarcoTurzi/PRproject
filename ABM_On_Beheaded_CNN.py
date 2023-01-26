@@ -20,6 +20,14 @@ import  pickle
 tf.disable_eager_execution()
 
 def RunCompleteRoutineOnVGG(dataRootDirectory, maxDataPerRace=100,incorporate_train_data_in_evaluation=True, pickleABM_Runner = True):
+    """
+
+    @param dataRootDirectory:
+    @param maxDataPerRace:
+    @param incorporate_train_data_in_evaluation:
+    @param pickleABM_Runner:
+    @return:
+    """
     abm = ABM_Runner()
     abm.Run_ABM_on_VGG(dataRootDirectory,maxDataPerRace)
     abm.Evaluate_All()

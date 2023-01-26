@@ -59,7 +59,7 @@ class DataHandler:
                     nonExistent += 1
                     continue
 
-                if maxDataPerRace > 0 and i > max:
+                if max > 0 and i > max:
                     break
                 img = load_img(path, target_size = targetSize)
                 x = cnnPreproc(img)

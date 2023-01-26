@@ -13,16 +13,23 @@ class DataHandler:
         self.testDF = pd.read_csv(rootDirectory + '/test/test.csv')
         if not os.path.exists(rootDirectory + '/pickled_objects'):
             os.mkdir(rootDirectory + '/pickled_objects')
-    def get_transformed_feature_df(self, cnn, cnnPreproc, targetSize = (224,224),type="both", maxDataPerRace : int = 0):
+    def get_transformed_feature_df(self, cnn, cnnPreproc, targetSize = (224,224),type="both", maxDataPerRace = 0):
         """
 
-        :param cnn:
-        :param cnnPreproc:
-        :param type: can be either "train" or "test" to return train or test data only, or "both" to return both as a tuple.
-        :return:
+        @param cnn: The convolutional neural network model that will be used to extract a high level representation vector
+        from the images. It should have a predict function that takes a (preprocessed) multidimensional array and outputs a vector/
+        @param cnnPreproc: The function used to preprocess images before they can be processed by the cnn.
+        @param targetSize: The dimensions the input array of the CNN should have.
+        @param type: This is a string specifying the type of data that will be extracted. Its value can either be "train" for
+        extracting only training data, test for extracting only testing data, or "both" for extracting both as a tuple.
+        @param maxDataPerRace: this parameter determines the size of the subset of data that is used by specifying the
+        number of images that is included per race (per condition). If this value is an int, this same value will be used
+        for all races. If it is a <string, int> dictionary, with a key for each race, each race will have its own maximum
+        image value. If any value is zero or lower, all data will be used.
+        @return: A dataframe consisting of several data samples each of which consists of information on race, gender and the
+        elements of a high level vector representing the image. If type is "both", a tuple of a train set data frame and a
+        test set data frame will be returned.
         """
-
-
         if not type in ["train","test","both"]:
             return None
         if type == "both":
@@ -41,13 +48,16 @@ class DataHandler:
             print('Preprocessing data for race label "'+ race +'"')
             nonExistent = 0
             i = 0
+            max = maxDataPerRace
+            if isinstance(maxDataPerRace,dict):
+                max = maxDataPerRace[race]
             for imgName in df[df['race']==race].index:
                 path = self.rootD+'/'+type+'/'+df.loc[imgName,'race'] +'/'+imgName+'.jpg'
                 if  not isinstance(path,str) or not os.path.exists(path):
                     nonExistent += 1
                     continue
 
-                if maxDataPerRace > 0 and i > maxDataPerRace:
+                if maxDataPerRace > 0 and i > max:
                     break
                 img = load_img(path, target_size = targetSize)
                 x = cnnPreproc(img)

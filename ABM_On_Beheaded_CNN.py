@@ -184,12 +184,60 @@ class ABM_Runner:
         print("Test set: Average odds difference = %f" % classified_metric_nodebiasing_test.average_odds_difference())
         print("Test set: Theil_index = %f" % classified_metric_nodebiasing_test.theil_index())
 
-    def Evaluate_All(self):
+    def Evaluate_All(self, includeIntersectionalResults = False):
         if not self.trained:
             print("Cannot evaluate yet. Please train the ABM model first.")
             return
+        if includeIntersectionalResults:
+            self.Evaluate_Per_Race(False)
+            self.Evaluate_Per_Race(True)
         self.Evaluate(False)
         self.Evaluate(True)
+
+
+    def Evaluate_Per_Race(self, debiased):
+        dataMod = self.Pred_test_plain
+        if debiased:
+            dataMod = self.Pred_test_debiased
+        dataTrue = self.test_data
+
+        for race in pd.unique(self.raceTest):
+            df = pd.DataFrame(index=['female','male'])
+            TP = 0
+            TN = 0
+            FP = 0
+            FN = 0
+            Y = dataTrue.labels[:,0]
+            Y_hat = dataMod.labels[:,0]
+            Z = self.raceTest.array
+            for i in range(len(Y)):
+                if Z[i] != race:
+                    continue
+                if Y_hat[i] == 1.0:
+                    if Y[i] == 1.0:
+                        TP += 1
+                    else:
+                        FP += 1
+                else:
+                    if Y[i] == 0.0:
+                        TN += 1
+                    else:
+                        FN += 1
+            TP_M = TN
+            TN_M = TP
+            FP_M = FN
+            FN_M = FP
+            df['accuracy'] = [(TP+TN)/(TP+TN+FP+FN), (TP_M+TN_M)/(TP_M+TN_M+FP_M+FN_M)]
+            df['recall'] =[TP/(TP+FN), TP_M/(TP_M+FN_M)]
+            df['precision'] = [TP/(TP+FP), TP_M/(TP_M+FP_M)]
+            df['f1'] = [2*TP/(2*TP+FP+FN),2*TP_M/(2*TP_M+FP_M+FN_M)]
+            caption = "Intersectional results for biased model on " + race + " data:"
+            if debiased:
+                caption = caption.replace("biased", "unbiased")
+            print(caption)
+            print(df)
+
+
 
     def Save(self, directory):
         if not os.path.exists(directory):

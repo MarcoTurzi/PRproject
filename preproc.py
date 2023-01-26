@@ -41,10 +41,11 @@ class DataHandler:
             df = self.testDF.copy()
         df.index = df['image_name']
         df.drop(['noGlasses','sunglasses','eyeglasses','age','hair_color','image_name'],axis=1,inplace=True)
-        X = []
+        O = []
         indices = []
 
         for race in pd.unique(df['race']):
+
             print('Preprocessing data for race label "'+ race +'"')
             nonExistent = 0
             i = 0
@@ -52,6 +53,7 @@ class DataHandler:
             if isinstance(maxDataPerRace,dict):
                 max = maxDataPerRace[race]
             for imgName in df[df['race']==race].index:
+
                 path = self.rootD+'/'+type+'/'+df.loc[imgName,'race'] +'/'+imgName+'.jpg'
                 if  not isinstance(path,str) or not os.path.exists(path):
                     nonExistent += 1
@@ -61,17 +63,20 @@ class DataHandler:
                     break
                 img = load_img(path, target_size = targetSize)
                 x = cnnPreproc(img)
+                o = cnn.predict(np.array([x]))
                 del img
-                X.append(x)
+                del x
+                O.append(o[0])
                 indices.append(imgName)
 
                 i += 1
-                #print(str(i))
+                if i % 500 == 0:
+                    print(str(i))
                 #gc.collect()
             if nonExistent > 0:
                 print("Warning: " + str(nonExistent) + " filenames were not found.")
 
-        X = np.array(X)
+
         print("Preprocessing for CNN model has finished for " + type + " data...")
         print("CNN transformation has started for " + type + " data...")
 
@@ -79,13 +84,13 @@ class DataHandler:
 
 
 
-        O = cnn.predict(X)
-        del X
 
 
 
 
-        dfRes = pd.DataFrame(O)
+
+
+        dfRes = pd.DataFrame(np.array(O))
 
         dfRes.index = indices
         dfRes = dfRes.join(df)

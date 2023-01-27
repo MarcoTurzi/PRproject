@@ -3,13 +3,40 @@
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
+from keras import layers
 from tensorflow.keras.models import Sequential,Model
 from tensorflow.keras.layers import ZeroPadding2D,Convolution2D,MaxPooling2D
 from tensorflow.keras.layers import Dense,Dropout,Softmax,Flatten,Activation,BatchNormalization
 from tensorflow.keras.preprocessing.image import load_img,img_to_array
 from tensorflow.keras.applications.imagenet_utils import preprocess_input
 import tensorflow.keras.backend as K
+import cv2
 import os
+
+def GetResnet50():
+    # Create the base model
+    base_model = tf.keras.applications.ResNet50(weights='imagenet', 
+                                            include_top=False,
+                                            pooling="avg",
+                                            input_shape=(299,299,3),
+                                            classes=2)
+
+    # Freeze the base model
+    for each_layer in base_model.layers:
+
+            each_layer.trainable=False
+
+    model.add(base_model)
+    # Add a new classifier on top
+    model.add(tf.keras.layers.BatchNormalization())
+    model.add(tf.keras.layers.Flatten())
+    model.add(tf.keras.layers.BatchNormalization())
+    model.add(tf.keras.layers.Dense(512, activation = 'relu'))
+    model.add(tf.keras.layers.BatchNormalization())
+    model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
+    resnet50_model =Model(inputs=model.layers[0].input,outputs=model.layers[-2].output)
+    return resnet50_model
+
 
 def GetBeheadedVGG():
     # Define VGG_FACE_MODEL architecture

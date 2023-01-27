@@ -25,7 +25,7 @@ def GetResnet50():
     for each_layer in base_model.layers:
 
             each_layer.trainable=False
-
+    model = tf.keras.Sequential()
     model.add(base_model)
     # Add a new classifier on top
     model.add(tf.keras.layers.BatchNormalization())

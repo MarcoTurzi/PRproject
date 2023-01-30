@@ -1,4 +1,5 @@
-#This code reads the face arg data and converts it to the format required for ABM
+#This code reads the faceARG data, preprocesses it and uses a CNN to extract features from it.
+#It is written by ourselves
 import numpy as np
 import pandas as pd
 from tensorflow.keras.preprocessing.image import load_img
@@ -8,6 +9,10 @@ import gc
 
 class DataHandler:
     def __init__(self, rootDirectory):
+        """
+        Creates an object to read, data preprocess it and extract a high-level representational vector from it.
+        @param rootDirectory: the directory of the extracted, unaltered FaceARG folder containing all train and test data.
+        """
         self.rootD = rootDirectory
         self.trainDF = pd.read_csv(rootDirectory + '/train/train.csv')
         self.testDF = pd.read_csv(rootDirectory + '/test/test.csv')
